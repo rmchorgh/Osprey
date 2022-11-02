@@ -52,7 +52,7 @@ class Matrix:
                     raise Exception(f"Column: GP{c} is not a pin.")
 
                 self.cols[kc] = dio(getattr(board, f"GP{c}"))
-                self.cols[kc].switch_to_input(pull=Pull.UP)
+                self.cols[kc].switch_to_input(pull=Pull.DOWN)
 
             self.rows = []
             for r in matrix["rows"]:
@@ -60,7 +60,7 @@ class Matrix:
                     raise Exception(f"Row: GP{r} is not a pin.")
 
                 self.rows += [dio(getattr(board, f"GP{r}"))]
-                self.rows[-1].switch_to_input(pull=Pull.DOWN)
+                self.rows[-1].value = 0
 
             # for ki in matrix["i2c"]:
             #     i = matrix["i2c"][ki]
@@ -79,38 +79,31 @@ class Matrix:
 
 
 def listen(kbd, lm, m):
-    offset = 0
     pressed = set([])
     while True:
-        for kc in m.cols:
-            c = m[kc]
-            for kr, r in enumerate(m.rows):
-                if (c.value and r.value) and (f"{kc}{kr}" not in pressed):
-                    pressed.add(f"{kc}{kr}")
-                    for x in lm[kc, kr, offset]:
+        for r in m.rows:
+            r.value = 1
+            for kc in m.cols:
+                c = m[kc]
+                cr = f"{kc}{kr}"
+                if c.value and (cr not in pressed):
+                    pressed.add(cr)
+                    for x in lm[kc, kr]:
                         kbd.press(x)
-                elif not (c.value and r.value) and (f"{kc}{kr}" in pressed):
-                    pressed.remove(f"{kc}{kr}")
-                    for x in lm[kc, kr, offset]:
+                elif not c.value and cr in pressed:
+                    pressed.remove(cr)
+                    for x in lm[kc, kr]:
                         kbd.release(x)
-
+            r.value = 0
         sleep(1)
 
 
 try:
-    # kbd = Keyboard(devices)
-    # lm = LayerManager()
+    kbd = Keyboard(devices)
+    lm = LayerManager()
     m = Matrix()
 
-    while True:
-        c = m["a"].value
-        r = m[3].value
-
-        print("col", 1 if c else 0)
-        print("row", 1 if r else 0)
-        print("")
-        sleep(1)
-    # listen(kbd, lm, m)
+    listen(kbd, lm, m)
 
 except KeyboardInterrupt:
     import os
