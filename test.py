@@ -60,6 +60,7 @@ class Matrix:
                     raise Exception(f"Row: GP{r} is not a pin.")
 
                 self.rows += [dio(getattr(board, f"GP{r}"))]
+                self.rows[-1].switch_to_output()
                 self.rows[-1].value = 0
 
             # for ki in matrix["i2c"]:
@@ -81,21 +82,26 @@ class Matrix:
 def listen(kbd, lm, m):
     pressed = set([])
     while True:
-        for r in m.rows:
+        for kr, r in enumerate(m.rows):
             r.value = 1
             for kc in m.cols:
                 c = m[kc]
-                cr = f"{kc}{kr}"
+                cr = f"{kc}{kr}"  # lm[kc, kr, 0, True]
                 if c.value and (cr not in pressed):
                     pressed.add(cr)
-                    for x in lm[kc, kr]:
-                        kbd.press(x)
-                elif not c.value and cr in pressed:
+                    for x in lm[kc, kr, 0]:
+                        if x is None:
+                            print(lm[kc, kr, 0, True])
+                        else:
+                            kbd.press(x)
+
+                if not c.value and cr in pressed:
                     pressed.remove(cr)
-                    for x in lm[kc, kr]:
-                        kbd.release(x)
+                    for x in lm[kc, kr, 0]:
+                        if x is not None:
+                            kbd.release(x)
             r.value = 0
-        sleep(1)
+        sleep(0.001)
 
 
 try:

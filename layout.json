@@ -1,6 +1,6 @@
 {
 	"date": "2022-11-1",
-	"start": "linux",
+	"start": "mac",
 	"layers": {
 		"mac": {
 			"sublayers": ["Shf", "Fun", "Sup"],
