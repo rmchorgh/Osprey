@@ -2,7 +2,10 @@ from usb_hid import devices
 from adafruit_hid.keyboard import Keyboard
 from json import loads, dumps
 from digitalio import DigitalInOut as dio, Direction, Pull
-from board import GP15
+
+# from board import GP15
+import board
+from busio import I2C
 from time import sleep
 from convert import Keycode
 
@@ -23,6 +26,7 @@ class LayerManager:
             c, r, sl = i
 
         code = self.layers["layers"][self.active][c][r]
+        print(code)
         if isinstance(code, list):
             m = min(len(code) - 1, sl)
             code = code[m]
@@ -30,21 +34,85 @@ class LayerManager:
         return code if s else Keycode.parse(code)
 
 
-kbd = Keyboard(devices)
+class Matrix:
+    def __init__(self):
+        with open("pinmap.json", "r") as f:
+            matrix = loads(f.read())
+            if matrix["ncols"] != len(matrix["cols"]):
+                raise Exception(
+                    f"ncols and added cols do not match.{len(matrix['cols'])}"
+                )
+            if matrix["nrows"] != len(matrix["rows"]):
+                raise Exception("nrows and added rows do not match.")
 
-lm = LayerManager()
+            self.cols = {}
+            for kc in matrix["cols"]:
+                c = matrix["cols"][kc]
+                if f"GP{c}" not in dir(board):
+                    raise Exception(f"Column: GP{c} is not a pin.")
 
-a0 = dio(GP15)
-a0.switch_to_input(pull=Pull.UP)
+                self.cols[kc] = dio(getattr(board, f"GP{c}"))
+                self.cols[kc].switch_to_input(pull=Pull.UP)
 
-pressed = False
-while True:
-    if not (a0.value or pressed):
-        pressed = True
-        for x in lm["b", 3, 3]:
-            kbd.press(x)
-    if a0.value and pressed:
-        pressed = False
-        kbd.release_all()
+            self.rows = []
+            for r in matrix["rows"]:
+                if f"GP{r}" not in dir(board):
+                    raise Exception(f"Row: GP{r} is not a pin.")
 
-    sleep(0.001)
+                self.rows += [dio(getattr(board, f"GP{r}"))]
+                self.rows[-1].switch_to_input(pull=Pull.DOWN)
+
+            # for ki in matrix["i2c"]:
+            #     i = matrix["i2c"][ki]
+            #     if f"GP{i}" not in dir(board):
+            #         raise Exception(f"i2c: GP{r} is not a pin.")
+
+            # scl = getattr(board, f"GP{matrix['i2c']['scl']}")
+            # sda = getattr(board, f"GP{matrix['i2c']['sda']}")
+            # self.i2c = I2C(scl, sda)
+
+    def __getitem__(self, i):
+        if isinstance(i, str):
+            return self.cols[i]
+        elif isinstance(i, int):
+            return self.rows[i]
+
+
+def listen(kbd, lm, m):
+    offset = 0
+    pressed = set([])
+    while True:
+        for kc in m.cols:
+            c = m[kc]
+            for kr, r in enumerate(m.rows):
+                if (c.value and r.value) and (f"{kc}{kr}" not in pressed):
+                    pressed.add(f"{kc}{kr}")
+                    for x in lm[kc, kr, offset]:
+                        kbd.press(x)
+                elif not (c.value and r.value) and (f"{kc}{kr}" in pressed):
+                    pressed.remove(f"{kc}{kr}")
+                    for x in lm[kc, kr, offset]:
+                        kbd.release(x)
+
+        sleep(1)
+
+
+try:
+    # kbd = Keyboard(devices)
+    # lm = LayerManager()
+    m = Matrix()
+
+    while True:
+        c = m["a"].value
+        r = m[3].value
+
+        print("col", 1 if c else 0)
+        print("row", 1 if r else 0)
+        print("")
+        sleep(1)
+    # listen(kbd, lm, m)
+
+except KeyboardInterrupt:
+    import os
+
+    os.rename("test.py", "_test.py")
