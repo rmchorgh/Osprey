@@ -3,7 +3,6 @@ from adafruit_hid.keyboard import Keyboard
 from json import loads, dumps
 from digitalio import DigitalInOut as dio, Direction, Pull
 
-# from board import GP15
 import board
 from busio import I2C
 from time import sleep
@@ -26,7 +25,6 @@ class LayerManager:
             c, r, sl = i
 
         code = self.layers["layers"][self.active][c][r]
-        print(code)
         if isinstance(code, list):
             m = min(len(code) - 1, sl)
             code = code[m]
@@ -78,7 +76,6 @@ class Matrix:
         elif isinstance(i, int):
             return self.rows[i]
 
-
 def listen(kbd, lm, m):
     pressed = set([])
     while True:
@@ -90,10 +87,9 @@ def listen(kbd, lm, m):
                 if c.value and (cr not in pressed):
                     pressed.add(cr)
                     for x in lm[kc, kr, 0]:
-                        if x is None:
-                            print(lm[kc, kr, 0, True])
-                        else:
+                        if x is not None:
                             kbd.press(x)
+                    print(pressed)
 
                 if not c.value and cr in pressed:
                     pressed.remove(cr)
@@ -104,14 +100,8 @@ def listen(kbd, lm, m):
         sleep(0.001)
 
 
-try:
-    kbd = Keyboard(devices)
-    lm = LayerManager()
-    m = Matrix()
+kbd = Keyboard(devices)
+lm = LayerManager()
+m = Matrix()
 
-    listen(kbd, lm, m)
-
-except KeyboardInterrupt:
-    import os
-
-    os.rename("test.py", "_test.py")
+listen(kbd, lm, m)

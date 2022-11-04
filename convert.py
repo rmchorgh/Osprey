@@ -1,6 +1,6 @@
 from adafruit_hid.keycode import Keycode as K
 
-
+# selected cols e f rows 6 8
 class Keycode:
     def lookup(x: str, side: int = 0):
         if x is None:
@@ -26,6 +26,9 @@ class Keycode:
                     "9": "NINE",
                     "0": "ZERO",
                 }
+
+                if x in table.keys():
+                    c = table[x]
         elif l == 2:
             if x in dir(K):
                 c = x
@@ -35,8 +38,9 @@ class Keycode:
                 "Sup": ["LEFT_GUI", "RIGHT_GUI"][side],
                 "Tab": "TAB",
                 "Bsp": "BACKSPACE",
-                "Ent": "ENTER",
+                "Ent": "RETURN",
                 "Ctr": ["LEFT_CONTROL", "RIGHT_CONTROL"][side],
+                "Spc": 'SPACEBAR', 
             }
 
             if x in table.keys():
@@ -44,6 +48,10 @@ class Keycode:
 
         if c is not None:
             return getattr(K, c)
+        # else:
+            # print(x)
+            # print(sorted(dir(K)[5:]))
+            # print("")
 
     def parse(x: str):
         if x is None:
