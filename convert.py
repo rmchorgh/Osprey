@@ -40,7 +40,7 @@ class Keycode:
                 "Bsp": "BACKSPACE",
                 "Ent": "RETURN",
                 "Ctr": ["LEFT_CONTROL", "RIGHT_CONTROL"][side],
-                "Spc": 'SPACEBAR', 
+                "Spc": "SPACEBAR",
             }
 
             if x in table.keys():
@@ -48,10 +48,10 @@ class Keycode:
 
         if c is not None:
             return getattr(K, c)
-        # else:
-            # print(x)
-            # print(sorted(dir(K)[5:]))
-            # print("")
+        else:
+            print(x)
+            print(sorted(dir(K)[5:]))
+            print("")
 
     def parse(x: str):
         if x is None:

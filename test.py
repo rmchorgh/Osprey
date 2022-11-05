@@ -1,7 +1,7 @@
 from usb_hid import devices
 from adafruit_hid.keyboard import Keyboard
-from json import loads, dumps
-from digitalio import DigitalInOut as dio, Direction, Pull
+from json import loads
+from digitalio import DigitalInOut as dio, Pull
 
 import board
 from busio import I2C
@@ -12,24 +12,81 @@ from convert import Keycode
 class LayerManager:
     def __init__(self):
         with open("layout.json", "r") as f:
-            self.layers = loads(f.read())
+            ljson = loads(f.read())
+            self.layers = ljson["layers"]
+            self.active = ljson["start"]
+            self.sublayer = 0
 
-        self.active = self.layers["start"]
+        self.matrix = Matrix()
+        self.kbd = Keyboard(devices)
+        self.pressed = set()
 
     def __getitem__(self, i):
         s = False
-        sl = 0
-        if len(i) == 4:
-            c, r, sl, s = i
+        if len(i) == 3:
+            c, r, s = i
         else:
-            c, r, sl = i
+            c, r = i
 
-        code = self.layers["layers"][self.active][c][r]
-        if isinstance(code, list):
-            m = min(len(code) - 1, sl)
-            code = code[m]
-
+        code = self.layers[self.active][c][r]
         return code if s else Keycode.parse(code)
+
+    def getKeySublayer(self, key):
+        sls = self.layers[self.active]["sublayers"]
+        sublayer = 0
+        for i, sl in enumerate(sls):
+            if sl == key or (isinstance(key, list) and sl == key[0]):
+                sublayer = 1 + i
+                break
+
+        return sublayer
+
+    def press(self, key, sl, kc, kr):
+        cr = f"{kc}{kr}_{sl}"
+
+        if cr not in self.pressed:
+            #self.pressed.add(cr)
+            if isinstance(key, list):
+                if key[sl] == 0:
+                    key = f"Shf+{key[0]}"
+                else:
+                    key = key[sl]
+
+            for x in key.split("+"):
+                try:
+                    self.kbd.press(Keycode.lookup(x))
+                except:
+                    print(x)
+
+    def release(self, key, sl, kc, kr):
+        cr = f"{kc}{kr}_{sl}"
+
+        if cr in self.pressed:
+            self.pressed.remove(cr)
+            if isinstance(key, list):
+                if key[sl] == 0:
+                    key = f"Shf+{key[0]}"
+                else:
+                    key = key[sl]
+
+            for x in key.split("+"):
+                self.kbd.release(Keycode.lookup(x))
+
+    def listen(self):
+        while True:
+            for kr, r in enumerate(self.matrix.rows):
+                r.value = 1
+                for kc in self.matrix.cols:
+                    key = self[kc, kr, True]
+                    sl = self.getKeySublayer(key)
+                    cr = f"{kc}{kr}_{sl}"
+
+                    if self.matrix.cols[kc].value: #and cr not in self.pressed:
+                        self.press(key, sl, kc, kr)
+                    # elif not self.matrix.cols[kc].value and cr in self.pressed:
+                    # 	self.release(key, sl, kc, kr)
+                r.value = 0
+            sleep(0.001)
 
 
 class Matrix:
@@ -76,32 +133,6 @@ class Matrix:
         elif isinstance(i, int):
             return self.rows[i]
 
-def listen(kbd, lm, m):
-    pressed = set([])
-    while True:
-        for kr, r in enumerate(m.rows):
-            r.value = 1
-            for kc in m.cols:
-                c = m[kc]
-                cr = f"{kc}{kr}"  # lm[kc, kr, 0, True]
-                if c.value and (cr not in pressed):
-                    pressed.add(cr)
-                    for x in lm[kc, kr, 0]:
-                        if x is not None:
-                            kbd.press(x)
-                    print(pressed)
 
-                if not c.value and cr in pressed:
-                    pressed.remove(cr)
-                    for x in lm[kc, kr, 0]:
-                        if x is not None:
-                            kbd.release(x)
-            r.value = 0
-        sleep(0.001)
-
-
-kbd = Keyboard(devices)
 lm = LayerManager()
-m = Matrix()
-
-listen(kbd, lm, m)
+lm.listen()
