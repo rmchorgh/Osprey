@@ -19,7 +19,7 @@ class LayerManager:
 
         self.matrix = Matrix()
         self.kbd = Keyboard(devices)
-        self.pressed = set()
+        self.pressed = {}
 
     def __getitem__(self, i):
         s = False
@@ -32,6 +32,9 @@ class LayerManager:
         return code if s else Keycode.parse(code)
 
     def getKeySublayer(self, key):
+        if self.sublayer > 0:
+            return self.sublayer
+
         sls = self.layers[self.active]["sublayers"]
         sublayer = 0
         for i, sl in enumerate(sls):
@@ -41,16 +44,17 @@ class LayerManager:
 
         return sublayer
 
-    def press(self, key, sl, kc, kr):
-        cr = f"{kc}{kr}_{sl}"
-
-        if cr not in self.pressed:
-            #self.pressed.add(cr)
+    def press(self, key, cr):
+        self.sublayer = self.getKeySublayer(key)
+        if cr not in self.pressed.keys():
+            self.sublayer = self.getKeySublayer(key)
             if isinstance(key, list):
-                if key[sl] == 0:
+                if key[self.sublayer] == 0:
                     key = f"Shf+{key[0]}"
                 else:
-                    key = key[sl]
+                    key = key[self.sublayer]
+
+            self.pressed[cr] = self.sublayer
 
             for x in key.split("+"):
                 try:
@@ -58,35 +62,37 @@ class LayerManager:
                 except:
                     print(x)
 
-    def release(self, key, sl, kc, kr):
-        cr = f"{kc}{kr}_{sl}"
-
-        if cr in self.pressed:
-            self.pressed.remove(cr)
+    def release(self, key, cr):
+        if cr in self.pressed.keys():
             if isinstance(key, list):
-                if key[sl] == 0:
+                if key[self.pressed[cr]] == 0:
                     key = f"Shf+{key[0]}"
                 else:
-                    key = key[sl]
+                    key = key[self.pressed[cr]]
+
+            del self.pressed[cr]
 
             for x in key.split("+"):
                 self.kbd.release(Keycode.lookup(x))
 
     def listen(self):
-        while True:
-            for kr, r in enumerate(self.matrix.rows):
-                r.value = 1
-                for kc in self.matrix.cols:
-                    key = self[kc, kr, True]
-                    sl = self.getKeySublayer(key)
-                    cr = f"{kc}{kr}_{sl}"
-
-                    if self.matrix.cols[kc].value: #and cr not in self.pressed:
-                        self.press(key, sl, kc, kr)
-                    # elif not self.matrix.cols[kc].value and cr in self.pressed:
-                    # 	self.release(key, sl, kc, kr)
-                r.value = 0
-            sleep(0.001)
+        try:
+            while True:
+                for kr, r in enumerate(self.matrix.rows):
+                    r.value = 1
+                    for kc in self.matrix.cols:
+                        key = self[kc, kr, True]
+                        cr = f"{kc}{kr}"
+                        if self.matrix.cols[kc].value:
+                            self.press(key, cr)
+                        else:
+                            self.release(key, cr)
+                    r.value = 0
+                sleep(0.001)
+        except KeyboardInterrupt:
+            self.kbd.release_all()
+        except TypeError:
+            self.kbd.release_all()
 
 
 class Matrix:
@@ -136,3 +142,11 @@ class Matrix:
 
 lm = LayerManager()
 lm.listen()
+
+
+# lm.matrix[2].value = 1
+# while True:
+#     if lm.matrix['_d'].value:
+#         lm.press(lm['_d', 2, True], '_d2')
+#     else:
+#         lm.release(lm['_d', 2, True], '_d2')
