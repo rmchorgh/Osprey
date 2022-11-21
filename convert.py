@@ -2,6 +2,7 @@ from json import loads
 from kmk.keys import KC as kc, Key
 from kmk.modules.layers import Layers as L
 
+
 class Layers(L):
     def __init__(self, km):
         self.km = km
@@ -18,65 +19,64 @@ class Layers(L):
             kbd.add_key(kc.LSFT)
             print("fn shift")
 
-class Keymap:
-    def asKC(self, key):
-        if key is None:
-            return None
-        elif key == "Lyp":
-            self.active = (min(self.maxLayers, self.active[0] + 1), 0)
-            print("trying layer", self.active)
-            try:
-                return kc.TO(self.order[self.active])
-            except KeyError:
-                return kc.TRNS
-        elif key == "Lyn":
-            self.active = (max(0, self.active[0] - 1), 0)
-            print("trying layer", self.active)
-            try:
-                return kc.TO(self.order[self.active])
-            except KeyError:
-                return kc.TRNS
-        elif key == "Fun":
-            if (self.active, 2) in self.order.keys():
-                print("on fun sublayer")
-                return kc.MO(self.order[self.active, 2])
-            return kc.TRNS
-        elif len(key) == 1:
-            cn = ord(key)
 
-            # is a number
-            if cn >= 48 and cn <= 57:
-                tc = f"N{key}"
+class Keymap:
+    def asKC(self, char):
+        if char is None:
+            return None
+
+        for key in char.split("+"):
+            if key[0] == "F":
+                try:
+                    int(key[1:])
+                    tc = key
+                except:
+                    funlayer = 1 + self.deflayer['sublayers'].index('Fun')
+                    if funlayer > 0:
+                        tc = kc.MO(funlayer)
+                    else:
+                        tc = 'trns'
+            elif key == "Shf":
+                shflayer = 1 + self.deflayer['sublayers'].index('Shf')
+                if shflayer > 0:
+                    tc = kc.MO(shflayer)
+                else:
+                    tc = 'lsft'
+            elif len(key) == 1:
+                cn = ord(key)
+
+                # is a number
+                if cn >= 48 and cn <= 57:
+                    tc = f"N{key}"
+                else:
+                    tc = key
+            elif len(key) == 3:
+                try:
+                    # is a function greater than f9
+                    int(key[1:])
+                    tc = key
+                except:
+                    table = {
+                        "Esc": "esc",
+                        "Tab": "tab",
+                        "Spc": "spc",
+                        "Sup": "left_super",
+                        "Alt": "lalt",
+                        "Bsp": "bksp",
+                        "Ctr": "lctl",
+                        "Ent": "ent",
+                        "Dho": "home",
+                        "Den": "end",
+                        "Dup": "up",
+                        "Ddo": "down",
+                        "Dle": "left",
+                        "Dri": "right",
+                        "Del": "del",
+                        "Pst": "trns",
+                    }
+                    tc = table[key]
             else:
-                tc = key
-        elif len(key) == 3:
-            try:
-                # is a function greater than f9
-                int(key[1:])
-                tc = key
-            except:
-                table = {
-                    "Esc": "esc",
-                    "Tab": "tab",
-                    "Shf": "lsft",
-                    "Spc": "spc",
-                    "Sup": "left_super",
-                    "Alt": "lalt",
-                    "Bsp": "bksp",
-                    "Ctr": "lctl",
-                    "Ent": "ent",
-                    "Dho": "home",
-                    "Den": "end",
-                    "Dup": "up",
-                    "Ddo": "down",
-                    "Dle": "left",
-                    "Dri": "right",
-                    "Del": "del",
-                    "Pst": "trns",
-                }
-                tc = table[key]
-        else:
-            tc = "perc"
+                tc = "perc"
 
         return kc[tc.upper()]
 
