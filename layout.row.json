@@ -1,8 +1,8 @@
 {
 	"date": "2022-11-18",
 	"start": "mac",
-	"rows": 10,
-	"cols": 6,
+	"nrows": 10,
+	"ncols": 6,
 	"layers": {
 		"mac": {
 			"sublayers": ["Shf", "Fun", "Sup"],

@@ -24,6 +24,7 @@ class Keymap:
     def asKC(self, char):
         if char is None:
             return None
+        chord = None
 
         for key in char.split("+"):
             if key[0] == "F":
@@ -31,17 +32,17 @@ class Keymap:
                     int(key[1:])
                     tc = key
                 except:
-                    funlayer = 1 + self.deflayer['sublayers'].index('Fun')
+                    funlayer = 1 + self.deflayer["sublayers"].index("Fun")
                     if funlayer > 0:
                         tc = kc.MO(funlayer)
                     else:
-                        tc = 'trns'
+                        tc = "trns"
             elif key == "Shf":
-                shflayer = 1 + self.deflayer['sublayers'].index('Shf')
+                shflayer = 1 + self.deflayer["sublayers"].index("Shf")
                 if shflayer > 0:
                     tc = kc.MO(shflayer)
                 else:
-                    tc = 'lsft'
+                    tc = "lsft"
             elif len(key) == 1:
                 cn = ord(key)
 
@@ -76,51 +77,42 @@ class Keymap:
                     }
                     tc = table[key]
             else:
-                tc = "perc"
+                tc = "trns"
 
-        return kc[tc.upper()]
+            if chord is None:
+                chord = kc[tc.upper()]
+            else:
+                chord = chord(tc.upper())
+
+        return chord
 
     def __init__(self, kbd):
         self.layout = []
-        self.order = {}
-        self.active = (0, 0)
-        self.maxLayers = 0
-        layerIndex = -1
 
         self.kbd = kbd
-        self.kbd.modules.append(Layers())
-        with open("layout.json", "r") as f:
+        self.kbd.modules.append(Layers(self))
+
+        with open("layout.row.json", "r") as f:
             j = loads(f.read())
-            for ikl, kl in enumerate(["mac"]):  #  j["layers"]
-                l = j["layers"][kl]
-                cols = [x for x in "fedcba"]
-                lm = [
-                    [None for x in range(10 * len(cols))]
-                    for y in range(1 + len(l["sublayers"]))
-                ]
+            self.nrows = j["nrows"]
+            self.ncols = j["ncols"]
+            self.deflayer = j["layers"][j["start"]]
+            self.nsublayers = len(self.deflayer["sublayers"])
 
-                self.maxLayers += 1
-                layerIndex += 1
-                self.order[(ikl, 0)] = layerIndex
-
-                for isl, sl in enumerate(l["sublayers"]):
-                    layerIndex += 1
-                    self.order[(ikl, isl + 1)] = layerIndex
-
-                for ci, c in enumerate(cols):
-                    for ri, char in enumerate(l[c]):
-                        index = (ri * 6) + ci
-
-                        if isinstance(char, list):
-                            for isl, sl in enumerate(char):
-                                if l["sublayers"][isl - 1] == "Shf" and sl == 0:
-                                    lm[isl][index] = kc.LSFT(self.asKC(char[0]))
-                                else:
-                                    lm[isl][index] = self.asKC(sl)
+        lm = [[] for _ in range(self.nsublayers)]
+        for r in range(nrows):
+            for char in self.deflayer[f"{r}"]:
+                if isinstance(char, list):
+                    for isl, sl in enumerate(char):
+                        if sl == 0:
+                            lm[1 + isl] += [kc.LSFT(self.asKC(char[0]))]
                         else:
-                            lm[0][index] = self.asKC(char)
-                self.layout += lm
+                            lm[1 + isl] += [self.asKC(sl)]
+                else:
+                    lm[0] += [self.asKC(char)]
+                    lm[1] += [kc.LSFT(self.asKC(char))]
+                    for isl in range(2, self.nsublayers):
+                        lm[isl] += [None]
 
-        self.kbd.keymap = self.layout
+        self.kbd.keymap = self.layout = lm
         print(self.layout[0])
-        # self.kbd.keymap = [[kc.A for x in range(60)]]
