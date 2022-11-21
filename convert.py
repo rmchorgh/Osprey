@@ -7,6 +7,7 @@ class Layers(L):
     def __init__(self, km):
         self.km = km
         self.shfPressed = False
+        super().__init__()
 
     def before_hid_send(self, kbd):
         if self.shfPressed and len(kbd.active_layers) == 1:
@@ -18,6 +19,8 @@ class Layers(L):
             kbd.remove_key(Key(1003))
             kbd.add_key(kc.LSFT)
             print("fn shift")
+
+        return super().before_hid_send(kbd)
 
 
 class Keymap:
@@ -34,15 +37,13 @@ class Keymap:
                 except:
                     funlayer = 1 + self.deflayer["sublayers"].index("Fun")
                     if funlayer > 0:
-                        tc = kc.MO(funlayer)
-                    else:
-                        tc = "trns"
+                        return kc.MO(funlayer)
+                    tc = "trns"
             elif key == "Shf":
                 shflayer = 1 + self.deflayer["sublayers"].index("Shf")
                 if shflayer > 0:
-                    tc = kc.MO(shflayer)
-                else:
-                    tc = "lsft"
+                    return kc.MO(shflayer)
+                tc = "lsft"
             elif len(key) == 1:
                 cn = ord(key)
 
@@ -74,6 +75,8 @@ class Keymap:
                         "Dri": "right",
                         "Del": "del",
                         "Pst": "trns",
+                        "Lyp": "trns",
+                        "Lyn": "trns",
                     }
                     tc = table[key]
             else:
@@ -82,7 +85,7 @@ class Keymap:
             if chord is None:
                 chord = kc[tc.upper()]
             else:
-                chord = chord(tc.upper())
+                chord = chord(kc[tc.upper()])
 
         return chord
 
@@ -99,20 +102,23 @@ class Keymap:
             self.deflayer = j["layers"][j["start"]]
             self.nsublayers = len(self.deflayer["sublayers"])
 
-        lm = [[] for _ in range(self.nsublayers)]
-        for r in range(nrows):
+        lm = [[] for _ in range(self.nsublayers + 1)]
+        for r in range(self.nrows):
             for char in self.deflayer[f"{r}"]:
+                print(r, char)
                 if isinstance(char, list):
                     for isl, sl in enumerate(char):
                         if sl == 0:
-                            lm[1 + isl] += [kc.LSFT(self.asKC(char[0]))]
+                            lm[isl] += [kc.LSFT(self.asKC(char[0]))]
                         else:
-                            lm[1 + isl] += [self.asKC(sl)]
+                            lm[isl] += [self.asKC(sl)]
                 else:
                     lm[0] += [self.asKC(char)]
                     lm[1] += [kc.LSFT(self.asKC(char))]
                     for isl in range(2, self.nsublayers):
                         lm[isl] += [None]
 
-        self.kbd.keymap = self.layout = lm
+        self.layout = lm
+        self.kbd.keymap = self.layout
+        print(len(self.layout))
         print(self.layout[0])

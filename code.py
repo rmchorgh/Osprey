@@ -20,10 +20,8 @@ with open("pinmap.json") as pinmap:
     if pm["nrows"] != len(rows):
         raise Exception("Check number of rows")
 
-    kbd.col_pins = [
-        getattr(board, f"GP{cols[x]}") for x in reversed(sorted(cols.keys()))
-    ]
-    kbd.row_pins = [getattr(board, f"GP{x}") for x in rows]
+    kbd.col_pins = [getattr(board, f"GP{c}") for c in cols]
+    kbd.row_pins = [getattr(board, f"GP{r}") for r in rows]
 
 kbd.diode_orientation = DiodeOrientation.COL2ROW
 
