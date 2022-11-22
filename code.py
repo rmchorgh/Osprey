@@ -1,7 +1,7 @@
 import board
+from digitalio import DigitalInOut, Direction
 
 from kmk.kmk_keyboard import KMKKeyboard
-from kmk.keys import KC
 from kmk.scanners import DiodeOrientation
 
 from storage import getmount
@@ -28,4 +28,7 @@ kbd.diode_orientation = DiodeOrientation.COL2ROW
 km = Keymap(kbd, side)
 
 if __name__ == "__main__":
+    led = DigitalInOut(board.GP25)
+    led.direction = Direction.OUTPUT
+    led.value = True
     kbd.go()

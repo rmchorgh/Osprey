@@ -41,7 +41,7 @@ class Keymap:
                 except:
                     funlayer = 1 + self.deflayer["sublayers"].index("Fun")
                     if funlayer > 0:
-                        return kc.MO(funlayer)
+                        return kc.TT(funlayer)
                     tc = "trns"
             elif key == "Shf":
                 shflayer = 1 + self.deflayer["sublayers"].index("Shf")
@@ -81,6 +81,7 @@ class Keymap:
                         "Pst": "trns",
                         "Lyp": "trns",
                         "Lyn": "trns",
+                        "Rsh": "rsft",
                     }
                     tc = table[key]
             else:
