@@ -10,8 +10,8 @@ from convert import Keymap
 
 kbd = KMKKeyboard()
 
-fn = "right" if str(getmount("/").label)[-1] == "R" else "left"
-with open(f"pinmap.{fn}.json") as pinmap:
+side = "right" if str(getmount("/").label)[-1] == "R" else "left"
+with open(f"pinmap.{side}.json") as pinmap:
     pm = loads(pinmap.read())
     cols = pm["cols"]
     rows = pm["rows"]
@@ -23,7 +23,6 @@ with open(f"pinmap.{fn}.json") as pinmap:
 
     kbd.col_pins = [getattr(board, f"GP{x}") for x in cols]
     kbd.row_pins = [getattr(board, f"GP{x}") for x in rows]
-    side = pm["side"]
 
 kbd.diode_orientation = DiodeOrientation.COL2ROW
 km = Keymap(kbd, side)
