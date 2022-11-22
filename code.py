@@ -4,13 +4,14 @@ from kmk.kmk_keyboard import KMKKeyboard
 from kmk.keys import KC
 from kmk.scanners import DiodeOrientation
 
+from storage import getmount
 from json import loads
 from convert import Keymap
 
 kbd = KMKKeyboard()
 
-
-with open("pinmap.right.json") as pinmap:
+fn = "right" if str(getmount("/").label)[-1] == "R" else "left"
+with open(f"pinmap.{fn}.json") as pinmap:
     pm = loads(pinmap.read())
     cols = pm["cols"]
     rows = pm["rows"]
