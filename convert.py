@@ -1,8 +1,10 @@
 from json import loads
+from board import GP0, GP1
+
 from kmk.keys import KC as kc, Key
 from kmk.modules.layers import Layers as L
-from board import GP0, GP1
-from kmk.modules.split import Split
+from kmk.modules.modtap import ModTap
+from kmk.modules.split import Split, SplitType
 
 
 class Layers(L):
@@ -97,7 +99,8 @@ class Keymap:
 
         self.kbd = kbd
         self.kbd.modules.append(Layers(self))
-        self.split = Split(data_pin=GP0, data_pin2=GP1)
+        self.kbd.modules.append(ModTap())
+        self.split = Split(split_type=SplitType.UART, data_pin=GP1, data_pin2=GP0)
         self.kbd.modules.append(self.split)
 
         with open("layout.json", "r") as f:
