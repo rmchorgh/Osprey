@@ -5,6 +5,7 @@ from kmk.kmk_keyboard import KMKKeyboard
 from kmk.scanners import DiodeOrientation
 
 from storage import getmount
+from time import sleep
 from json import loads
 from convert import Keymap
 
@@ -31,4 +32,6 @@ if __name__ == "__main__":
     led = DigitalInOut(board.GP25)
     led.direction = Direction.OUTPUT
     led.value = True
+    sleep(0.5)
+    led.value = False
     kbd.go()

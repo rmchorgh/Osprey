@@ -82,6 +82,7 @@ class Keymap:
                         "Lyp": "trns",
                         "Lyn": "trns",
                         "Rsh": "rsft",
+                        "Plu": "+"
                     }
                     tc = table[key]
             else:
