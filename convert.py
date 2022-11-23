@@ -41,7 +41,7 @@ class Keymap:
                 except:
                     funlayer = 1 + self.deflayer["sublayers"].index("Fun")
                     if funlayer > 0:
-                        return kc.TT(funlayer)
+                        return kc.MO(funlayer)
                     tc = "trns"
             elif key == "Shf":
                 shflayer = 1 + self.deflayer["sublayers"].index("Shf")
@@ -122,7 +122,12 @@ class Keymap:
 
             for char in self.deflayer[f"{r}"]:
                 if isinstance(char, list):
-                    for isl, sl in enumerate(char):
+                    for isl in range(1 + self.nsublayers):
+                        if isl >= len(char):
+                            lm[isl] += [None]
+                            continue
+
+                        sl = char[isl]
                         if sl == 0:
                             lm[isl] += [kc.LSFT(self.asKC(char[0]))]
                         else:
