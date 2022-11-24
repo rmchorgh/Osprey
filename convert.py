@@ -28,7 +28,7 @@ class Layers(L):
 
 
 class Keymap:
-    def asKC(self, char, layer=None):
+    def asKC(self, char, layer):
         if char is None:
             return None
         chord = None
@@ -39,20 +39,27 @@ class Keymap:
                     int(key[1:])
                     tc = key
                 except:
-                    funlayer = 1 + self.deflayer["sublayers"].index("Fun")
-                    if funlayer > 0:
+                    isl = 1 + self.layers[layer]["sublayers"].index("Fun")
+                    if isl > 0:
+                        funlayer = self.layerOrder[layer][isl]
+                        print(f"should fun to layer {funlayer}")
                         return kc.MO(funlayer)
                     tc = "trns"
             elif key == "Shf":
-                shflayer = 1 + self.deflayer["sublayers"].index("Shf")
-                if shflayer > 0:
+                isl = 1 + self.layers[layer]["sublayers"].index("Shf")
+                if isl > 0:
+                    shflayer = self.layerOrder[layer][isl]
+                    print(f"should shf to layer {shflayer}")
+
                     return kc.MO(shflayer)
                 tc = "lsft"
             elif key == "Lyp":
-                nl = [ k for k in self.layerOrder if k != layer ][0]
+                nl = [k for k in self.layerOrder if k != layer][0]
+                print(f"should go to layer {self.layerOrder[nl][0]}")
                 return kc.TO(self.layerOrder[nl][0])
             elif key == "Lyn":
-                pl = [ k for k in self.layerOrder if k != layer ][-1]
+                pl = [k for k in self.layerOrder if k != layer][-1]
+                print(f"should go to layer {self.layerOrder[pl][0]}")
                 return kc.TO(self.layerOrder[pl][0])
             elif len(key) == 1:
                 cn = ord(key)
@@ -109,7 +116,7 @@ class Keymap:
             self.nrows = j["nrows"]
             self.ncols = j["ncols"]
             self.layers = j["layers"]
-            self.deflayer = self.layers[j["start"]]
+            self.start = j["start"]
 
         self.layerOrder = {}
         i = 0
@@ -120,18 +127,16 @@ class Keymap:
                 self.layerOrder[main] += [i]
                 i += 1
 
+        self.kbd.active_layers[-1] = self.layerOrder[self.start][0]
         lm = [[] for _ in range(i)]
+
         for kl in self.layers:
             layer = self.layers[kl]
             l = self.layerOrder[kl]
 
             for ir in range(self.nrows):
-#                 if side == "left":
                 r = ir
-#                 else:
-#                     r = ir + self.nrows
-#                     layer[f"{r}"].reverse()
-                
+
                 for char in layer[f"{r}"]:
                     if isinstance(char, list):
                         for isl, sl in enumerate(self.layerOrder[kl]):
@@ -141,18 +146,15 @@ class Keymap:
 
                             slc = char[isl]
                             if slc == 0:
-                                lm[sl] += [kc.LSFT(self.asKC(char[0]), kl)]
+                                lm[sl] += [kc.LSFT(self.asKC(char[0], kl))]
                             else:
                                 lm[sl] += [self.asKC(slc, kl)]
                     else:
                         lm[l[0]] += [self.asKC(char, kl)]
                         if len(lm) > 1:
-                            lm[l[1]] += [
-                                kc.LSFT(self.asKC(char, kl))
-                            ]
+                            lm[l[1]] += [kc.LSFT(self.asKC(char, kl))]
                         for sl in l[2:]:
                             lm[sl] += [None]
 
         self.layout = lm
         self.kbd.keymap = self.layout
-        print(*[len(x) for x in self.layout])
