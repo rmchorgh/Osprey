@@ -25,6 +25,7 @@ with open(f"pinmap.{side}.json") as pinmap:
     kbd.col_pins = [getattr(board, f"GP{x}") for x in cols]
     kbd.row_pins = [getattr(board, f"GP{x}") for x in rows]
 
+kbd.debug_enabled = True
 kbd.diode_orientation = DiodeOrientation.COL2ROW
 km = Keymap(kbd, side)
 
