@@ -1,2 +1,9 @@
 .*
 !.gitignore
+
+designfiles
+images
+uf2
+
+*.zip
+adafruit-circuitpython-bundle-7.x-mpy-20221123

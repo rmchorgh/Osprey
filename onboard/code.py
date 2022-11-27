@@ -8,6 +8,7 @@ from storage import getmount
 from time import sleep
 from json import loads
 from convert import Keymap
+import display
 
 kbd = KMKKeyboard()
 
@@ -25,7 +26,7 @@ with open(f"pinmap.{side}.json") as pinmap:
     kbd.col_pins = [getattr(board, f"GP{x}") for x in cols]
     kbd.row_pins = [getattr(board, f"GP{x}") for x in rows]
 
-kbd.debug_enabled = True
+# kbd.debug_enabled = True
 kbd.diode_orientation = DiodeOrientation.COL2ROW
 km = Keymap(kbd, side)
 
@@ -35,4 +36,7 @@ if __name__ == "__main__":
     led.value = True
     sleep(0.5)
     led.value = False
+
+    display.start()
+
     kbd.go()

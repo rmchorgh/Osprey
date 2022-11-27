@@ -17,12 +17,10 @@ class Layers(L):
         if self.shfPressed and len(kbd.active_layers) == 1:
             self.shfPressed = False
             kbd.remove_key(kc.LSFT)
-            print("un fn shift")
         elif not self.shfPressed and len(kbd.active_layers) > 2:
             self.shfPressed = True
             kbd.remove_key(Key(1003))
             kbd.add_key(kc.LSFT)
-            print("fn shift")
 
         return super().before_hid_send(kbd)
 
@@ -42,24 +40,19 @@ class Keymap:
                     isl = 1 + self.layers[layer]["sublayers"].index("Fun")
                     if isl > 0:
                         funlayer = self.layerOrder[layer][isl]
-                        print(f"should fun to layer {funlayer}")
                         return kc.MO(funlayer)
                     tc = "trns"
             elif key == "Shf":
                 isl = 1 + self.layers[layer]["sublayers"].index("Shf")
                 if isl > 0:
                     shflayer = self.layerOrder[layer][isl]
-                    print(f"should shf to layer {shflayer}")
-
                     return kc.MO(shflayer)
                 tc = "lsft"
             elif key == "Lyp":
                 nl = [k for k in self.layerOrder if k != layer][0]
-                print(f"should go to layer {self.layerOrder[nl][0]}")
                 return kc.TO(self.layerOrder[nl][0])
             elif key == "Lyn":
                 pl = [k for k in self.layerOrder if k != layer][-1]
-                print(f"should go to layer {self.layerOrder[pl][0]}")
                 return kc.TO(self.layerOrder[pl][0])
             elif len(key) == 1:
                 cn = ord(key)
@@ -91,6 +84,7 @@ class Keymap:
                     "Lyn": "trns",
                     "Rsh": "rsft",
                     "Plu": "+",
+                    "Lys": "trns"
                 }
                 tc = table[key]
 
