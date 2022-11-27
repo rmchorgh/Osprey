@@ -6,6 +6,8 @@ from kmk.modules.layers import Layers as L
 from kmk.modules.modtap import ModTap
 from kmk.modules.split import Split, SplitType
 
+from display import OLED
+
 
 class Layers(L):
     def __init__(self, km):
@@ -26,9 +28,7 @@ class Layers(L):
 
     def _to_pressed(self, key, kbd, *args, **kwargs):
         self.km.oled.clear()
-        for i in range(key.meta.layer):
-            offset = (i + 1) * 3
-            self.km.oled.row(offset, offset + 2)
+        self.km.oled.showLayer(self.km.layerOrder, key.meta.layer)
 
         super()._to_pressed(key, kbd, *args, **kwargs)
 
@@ -56,11 +56,11 @@ class Keymap:
                     shflayer = self.layerOrder[layer][isl]
                     return kc.MO(shflayer)
                 tc = "lsft"
-            elif key == "Lyp":
+            elif key == "Lyn":
                 keys = sorted(self.layerOrder.keys())
                 nl = keys[keys.index(layer) - 1]
                 return kc.TO(self.layerOrder[nl][0])
-            elif key == "Lyn":
+            elif key == "Lyp":
                 keys = sorted(self.layerOrder.keys())
                 pl = keys.index(layer) + 1
                 if pl == len(keys):
@@ -138,7 +138,7 @@ class Keymap:
         self.kbd.active_layers[-1] = self.layerOrder[self.start][0]
         lm = [[] for _ in range(i)]
 
-        for kl in self.layers:
+        for kl in sorted(self.layers.keys()):
             layer = self.layers[kl]
             l = self.layerOrder[kl]
 
@@ -167,10 +167,6 @@ class Keymap:
         self.layout = lm
         self.kbd.keymap = self.layout
 
-        try:
-            from display import OLED
-
-            self.oled = OLED(led)
-            self.oled.clear()
-        except Exception as e:
-            print(e)
+        self.oled = OLED(led)
+        self.oled.clear()
+        self.oled.showLayer(self.layerOrder, self.layerOrder[self.start][0])

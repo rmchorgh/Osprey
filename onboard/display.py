@@ -36,9 +36,19 @@ class OLED:
             for x in range(self.w):
                 self.b[x, y] = 0
 
+        self.d.show(self.g)
+
     def row(self, start=0, end=h, v=1):
         for y in range(min(self.h, self.h - start - 1), max(0, self.h - end - 1), -1):
             for x in range(self.w):
                 self.b[x, y] = v
 
         self.d.show(self.g)
+
+    def showLayer(self, order, l):
+        for i, o in enumerate(sorted(order)):
+            if order[o][0] == l:
+                for y in range(1 + i):
+                    offset = y * 3
+                    self.row(offset, offset + 2)
+                break
