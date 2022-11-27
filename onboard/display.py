@@ -32,11 +32,7 @@ class OLED:
         self.g.append(self.tg)
 
     def clear(self):
-        for y in range(self.h):
-            for x in range(self.w):
-                self.b[x, y] = 0
-
-        self.d.show(self.g)
+        self.row(0, self.h, 0)
 
     def row(self, start=0, end=h, v=1):
         for y in range(min(self.h, self.h - start - 1), max(0, self.h - end - 1), -1):
@@ -49,6 +45,6 @@ class OLED:
         for i, o in enumerate(sorted(order)):
             if order[o][0] == l:
                 for y in range(1 + i):
-                    offset = y * 3
-                    self.row(offset, offset + 2)
+                    offset = y * 10
+                    self.row(offset, offset + 5)
                 break
