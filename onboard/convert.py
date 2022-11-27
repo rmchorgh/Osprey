@@ -24,6 +24,14 @@ class Layers(L):
 
         return super().before_hid_send(kbd)
 
+    def _to_pressed(self, key, kbd, *args, **kwargs):
+        self.km.oled.clear()
+        for i in range(key.meta.layer):
+            offset = (i + 1) * 3
+            self.km.oled.row(offset, offset + 2)
+
+        super()._to_pressed(key, kbd, *args, **kwargs)
+
 
 class Keymap:
     def asKC(self, char, layer):
@@ -49,10 +57,16 @@ class Keymap:
                     return kc.MO(shflayer)
                 tc = "lsft"
             elif key == "Lyp":
-                nl = [k for k in self.layerOrder if k != layer][0]
+                keys = sorted(self.layerOrder.keys())
+                nl = keys[keys.index(layer) - 1]
                 return kc.TO(self.layerOrder[nl][0])
             elif key == "Lyn":
-                pl = [k for k in self.layerOrder if k != layer][-1]
+                keys = sorted(self.layerOrder.keys())
+                pl = keys.index(layer) + 1
+                if pl == len(keys):
+                    pl = keys[0]
+                else:
+                    pl = keys[pl]
                 return kc.TO(self.layerOrder[pl][0])
             elif len(key) == 1:
                 cn = ord(key)
@@ -84,7 +98,7 @@ class Keymap:
                     "Lyn": "trns",
                     "Rsh": "rsft",
                     "Plu": "+",
-                    "Lys": "trns"
+                    "Lys": "trns",
                 }
                 tc = table[key]
 
@@ -95,7 +109,7 @@ class Keymap:
 
         return chord
 
-    def __init__(self, kbd, side):
+    def __init__(self, kbd, side, led):
         self.layout = []
         self.side = side
 
@@ -152,3 +166,11 @@ class Keymap:
 
         self.layout = lm
         self.kbd.keymap = self.layout
+
+        try:
+            from display import OLED
+
+            self.oled = OLED(led)
+            self.oled.clear()
+        except Exception as e:
+            print(e)
