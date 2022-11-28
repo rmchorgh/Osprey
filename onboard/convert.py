@@ -30,9 +30,7 @@ class Layers(L):
     def _to_pressed(self, key, kbd, *args, **kwargs):
         self.km.oled.clear()
         self.km.oled.showLayer(self.km.layerOrder, key.meta.layer)
-        sleep(1)
 
-        self.km.oled.clear()
         super()._to_pressed(key, kbd, *args, **kwargs)
 
 

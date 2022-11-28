@@ -47,4 +47,7 @@ class OLED:
                 for y in range(1 + i):
                     offset = y * 10
                     self.row(offset, offset + 5)
+
+                sleep(1)
+                self.km.oled.clear()
                 break
