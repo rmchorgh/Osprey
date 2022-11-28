@@ -1,6 +1,5 @@
 from json import loads
 from board import GP0, GP1
-from time import sleep
 
 from kmk.keys import KC as kc, Key
 from kmk.modules.layers import Layers as L

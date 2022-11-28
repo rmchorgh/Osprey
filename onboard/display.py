@@ -49,5 +49,5 @@ class OLED:
                     self.row(offset, offset + 5)
 
                 sleep(1)
-                self.km.oled.clear()
+                self.clear()
                 break
