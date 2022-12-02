@@ -33,8 +33,6 @@ if __name__ == "__main__":
         led = DigitalInOut(board.GP25)
         led.direction = Direction.OUTPUT
         led.value = True
-        sleep(0.5)
-        led.value = False
 
         km = Keymap(kbd, side, led)
 

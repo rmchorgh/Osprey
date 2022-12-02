@@ -4,7 +4,7 @@ from board import GP0, GP1
 from kmk.keys import KC as kc, Key
 from kmk.modules.layers import Layers as L
 from kmk.modules.modtap import ModTap
-from kmk.modules.split import Split, SplitType
+from kmk.modules.split import Split, SplitType, SplitSide
 
 from display import OLED
 
@@ -27,8 +27,9 @@ class Layers(L):
         return super().before_hid_send(kbd)
 
     def _to_pressed(self, key, kbd, *args, **kwargs):
-        self.km.oled.clear()
-        self.km.oled.showLayer(self.km.layerOrder, key.meta.layer)
+        if self.km.side == "left":
+            self.km.oled.clear()
+            self.km.oled.showLayer(self.km.layerOrder, key.meta.layer)
 
         super()._to_pressed(key, kbd, *args, **kwargs)
 
@@ -113,11 +114,27 @@ class Keymap:
         self.layout = []
         self.side = side
 
+        if side == "left":
+            self.oled = OLED(led)
+
         self.kbd = kbd
         self.kbd.modules.append(Layers(self))
         self.kbd.modules.append(ModTap())
-        self.split = Split(split_type=SplitType.UART, data_pin=GP1, data_pin2=GP0)
+
+        print(side, "side")
+
+        self.split = Split(
+            split_type=SplitType.UART,
+            split_side=SplitSide.LEFT if side == "left" else SplitSide.RIGHT,
+            split_target_left=True,
+            data_pin=GP1 if side == "left" else GP0,
+            data_pin2=GP0 if side == "left" else GP1,
+            uart_flip=side == "right",
+            use_pio=True,
+        )
         self.kbd.modules.append(self.split)
+
+        print("added modules")
 
         with open("layout.json", "r") as f:
             j = loads(f.read())
@@ -167,6 +184,8 @@ class Keymap:
         self.layout = lm
         self.kbd.keymap = self.layout
 
-        self.oled = OLED(led)
-        self.oled.clear()
-        self.oled.showLayer(self.layerOrder, self.layerOrder[self.start][0])
+        print("added keymap")
+
+        if side == "left":
+            self.oled.clear()
+            self.oled.showLayer(self.layerOrder, self.layerOrder[self.start][0])
