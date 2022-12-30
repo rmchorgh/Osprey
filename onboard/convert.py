@@ -15,17 +15,6 @@ class Layers(L):
         self.shfPressed = False
         super().__init__()
 
-    def before_hid_send(self, kbd):
-        if self.shfPressed and len(kbd.active_layers) == 1:
-            self.shfPressed = False
-            kbd.remove_key(kc.LSFT)
-        elif not self.shfPressed and len(kbd.active_layers) > 2:
-            self.shfPressed = True
-            kbd.remove_key(Key(1003))
-            kbd.add_key(kc.LSFT)
-
-        return super().before_hid_send(kbd)
-
     def _to_pressed(self, key, kbd, *args, **kwargs):
         if self.km.side == "left":
             self.km.oled.clear()
@@ -49,25 +38,21 @@ class Keymap:
                     isl = 1 + self.layers[layer]["sublayers"].index("Fun")
                     if isl > 0:
                         funlayer = self.layerOrder[layer][isl]
-                        return kc.MO(funlayer)
+                        return kc.TO(funlayer)
                     tc = "trns"
             elif key == "Shf":
                 isl = 1 + self.layers[layer]["sublayers"].index("Shf")
                 if isl > 0:
                     shflayer = self.layerOrder[layer][isl]
-                    return kc.MO(shflayer)
+                    return kc.MT(kc.MO(shflayer), kc.LSFT)
                 tc = "lsft"
-            elif key == "Lyn":
+            elif key == "Lne":
                 keys = sorted(self.layerOrder.keys())
                 nl = keys[keys.index(layer) - 1]
                 return kc.TO(self.layerOrder[nl][0])
-            elif key == "Lyp":
+            elif key == "Lnu":
                 keys = sorted(self.layerOrder.keys())
-                pl = keys.index(layer) + 1
-                if pl == len(keys):
-                    pl = keys[0]
-                else:
-                    pl = keys[pl]
+                pl = keys[-1]
                 return kc.TO(self.layerOrder[pl][0])
             elif len(key) == 1:
                 cn = ord(key)
@@ -82,10 +67,13 @@ class Keymap:
                     "Esc": "esc",
                     "Tab": "tab",
                     "Spc": "spc",
-                    "Sup": "left_super",
-                    "Alt": "lalt",
+                    "Sul": "left_super",
+                    "Sur": "right_super",
+                    "All": "lalt",
+                    "Alr": "ralt",
                     "Bsp": "bksp",
-                    "Ctr": "lctl",
+                    "Ctl": "lctl",
+                    "Ctr": "rctl",
                     "Ent": "ent",
                     "Dho": "home",
                     "Den": "end",
@@ -93,13 +81,13 @@ class Keymap:
                     "Ddo": "down",
                     "Dle": "left",
                     "Dri": "right",
+                    "Ins": "ins",
+                    "Dpu": "pgup",
+                    "Dpd": "pgdn",
                     "Del": "del",
                     "Pst": "trns",
-                    "Lyp": "trns",
-                    "Lyn": "trns",
                     "Rsh": "rsft",
                     "Plu": "+",
-                    "Lys": "trns",
                 }
                 tc = table[key]
 
