@@ -57,7 +57,7 @@
 				"Rsh"
 			],
 			"8": ["Fun", "Bsp", "Lnu", "All", "Sul", "Ctl"],
-			"9": ["Ctr", "Sur", "Alr", "Lne", ["Spc", 0, "Sul+Spc"], "Bsp"]
+			"9": ["Sur", "Ctr", "Alr", "Lne", ["Spc", 0, "Sul+Spc"], "Bsp"]
 		},
 		"1numpad": {
 			"sublayers": ["Shf"],
