@@ -12,7 +12,6 @@ from display import OLED
 class Layers(L):
     def __init__(self, km):
         self.km = km
-        self.shfPressed = False
         super().__init__()
 
     def _to_pressed(self, key, kbd, *args, **kwargs):
@@ -38,14 +37,8 @@ class Keymap:
                     isl = 1 + self.layers[layer]["sublayers"].index("Fun")
                     if isl > 0:
                         funlayer = self.layerOrder[layer][isl]
-                        return kc.TO(funlayer)
+                        return kc.MO(funlayer)
                     tc = "trns"
-            elif key == "Shf":
-                isl = 1 + self.layers[layer]["sublayers"].index("Shf")
-                if isl > 0:
-                    shflayer = self.layerOrder[layer][isl]
-                    return kc.MT(kc.MO(shflayer), kc.LSFT)
-                tc = "lsft"
             elif key == "Lne":
                 keys = sorted(self.layerOrder.keys())
                 nl = keys[keys.index(layer) - 1]
@@ -53,7 +46,7 @@ class Keymap:
             elif key == "Lnu":
                 keys = sorted(self.layerOrder.keys())
                 pl = keys[-1]
-                return kc.TO(self.layerOrder[pl][0])
+                return kc.TG(self.layerOrder[pl][0])
             elif len(key) == 1:
                 cn = ord(key)
 
@@ -86,6 +79,7 @@ class Keymap:
                     "Dpd": "pgdn",
                     "Del": "del",
                     "Pst": "trns",
+                    "Lsh": "lsft",
                     "Rsh": "rsft",
                     "Plu": "+",
                 }
@@ -158,8 +152,14 @@ class Keymap:
                                 continue
 
                             slc = char[isl]
-                            if slc == 0:
-                                lm[sl] += [kc.LSFT(self.asKC(char[0], kl))]
+                            if isl == 1 or slc == 0:
+                                continue
+                            if isl == 0 and char[isl + 1] != 0:
+                                lm[sl] += [
+                                    kc.MT(
+                                        self.asKC(slc, kl), self.asKC(char[isl + 1], kl)
+                                    )
+                                ]
                             else:
                                 lm[sl] += [self.asKC(slc, kl)]
                     else:
