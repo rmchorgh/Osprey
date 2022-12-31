@@ -157,7 +157,9 @@ class Keymap:
                             if isl == 0 and char[isl + 1] != 0:
                                 lm[sl] += [
                                     kc.MT(
-                                        self.asKC(slc, kl), self.asKC(char[isl + 1], kl)
+                                        self.asKC(slc, kl),
+                                        self.asKC(char[isl + 1], kl),
+                                        prefer_hold=False,
                                     )
                                 ]
                             else:
