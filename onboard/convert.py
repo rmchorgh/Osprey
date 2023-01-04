@@ -39,14 +39,18 @@ class Keymap:
                         funlayer = self.layerOrder[layer][isl]
                         return kc.MO(funlayer)
                     tc = "trns"
-            elif key == "Lne":
+            elif key == "Lnu":
                 keys = sorted(self.layerOrder.keys())
                 nl = keys[keys.index(layer) - 1]
                 return kc.TO(self.layerOrder[nl][0])
-            elif key == "Lnu":
+            elif key == "Lne":
                 keys = sorted(self.layerOrder.keys())
-                pl = keys[-1]
-                return kc.TG(self.layerOrder[pl][0])
+                pl = keys.index(layer) + 1
+                if pl == len(keys):
+                    pl = keys[0]
+                else:
+                    pl = keys[pl]
+                return kc.TO(self.layerOrder[pl][0])
             elif len(key) == 1:
                 cn = ord(key)
 
