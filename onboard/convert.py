@@ -7,6 +7,7 @@ from kmk.modules.modtap import ModTap
 from kmk.modules.split import Split, SplitType, SplitSide
 
 from display import OLED
+from led_pwm import shine
 
 
 class Layers(L):
@@ -110,12 +111,8 @@ class Keymap:
         print(side, "side")
 
         self.split = Split(
-            split_type=SplitType.UART,
-            split_side=SplitSide.LEFT if side == "left" else SplitSide.RIGHT,
-            split_target_left=True,
-            data_pin=GP1 if side == "left" else GP0,
-            data_pin2=GP0 if side == "left" else GP1,
-            uart_flip=side == "right",
+            data_pin=GP1,
+            data_pin2=GP0,
             use_pio=True,
         )
         self.kbd.modules.append(self.split)
@@ -183,3 +180,5 @@ class Keymap:
         if side == "left":
             self.oled.clear()
             self.oled.showLayer(self.layerOrder, self.layerOrder[self.start][0])
+
+        shine()
