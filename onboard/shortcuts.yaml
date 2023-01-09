@@ -1,0 +1,92 @@
+date: 2023-01-08
+start: 0c;leMac
+nrows: 10
+ncols: 6
+layers:
+  0c;leMac:
+    sublayers:
+      - Shf
+      - Fun
+    0:
+      - - Esc
+        - '`'
+        - F1
+      - - 1
+        - '?'
+        - F2
+      - - 2
+        - 0
+        - F3
+      - - 3
+        - 0
+        - F4
+      - - 4
+        - 0
+        - F5
+      - - 5
+        - 0
+        - F6
+    3:
+      - - j 
+        - 0
+          # shrink main window 
+        - Alr+y
+      - - l
+        - '('
+          # move focused window to the previous workspace 
+        - Alr+u
+      - - u
+        - '{'
+          # go to previous workspace
+        - Alr+i
+      - - o
+        - '['
+          # mission control
+        - Alr+o
+      - y
+      - "'"
+    5:
+      - - m 
+        - ':'
+          # shrink focused window
+        - Alr+h
+      - - n 
+        - '='
+          # cycle focused window
+        - Alr+j
+      - - e 
+        - '-'
+          # go to next workspace
+        - Alr+k
+      - - i  
+        - '&'
+          # cycle screen layout
+        - Alr+l
+      - - ';' 
+        - '|'
+          # recompile screen layout
+        - 'Alr+;'
+      - Ent
+    7:
+      - - k
+        - 0
+          # expand main pane
+        - Alr+b
+      - - h
+        - 0
+          # move focused window to the next workspace
+        - Alr+n
+      - - '.'
+        - ','
+      - - '['
+        - '\'
+        - '<'
+      - - ']'
+        - '/'
+        - '>'
+      - Rsh
+  1c;lLinux:
+    template: 0c;leMac
+    sublayers:
+      - Shf
+      - Fun
