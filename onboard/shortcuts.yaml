@@ -48,7 +48,7 @@ layers:
     5:
       - - m 
         - ':'
-          # shrink focused window
+          # swap focused window with next window
         - Alr+h
       - - n 
         - '='
