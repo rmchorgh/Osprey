@@ -1,5 +1,6 @@
 from json import loads
 from board import GP0, GP1
+from time import sleep
 
 from kmk.keys import KC as kc, Key
 from kmk.modules.layers import Layers as L
@@ -19,7 +20,9 @@ class Layers(L):
         if self.km.side == "left":
             self.km.oled.clear()
             self.km.oled.showLayer(self.km.layerOrder, key.meta.layer)
-
+        shine(1, 1, 0)
+        sleep(0.5)
+        shine(1,1,1)
         super()._to_pressed(key, kbd, *args, **kwargs)
 
 
@@ -180,5 +183,3 @@ class Keymap:
         if side == "left":
             self.oled.clear()
             self.oled.showLayer(self.layerOrder, self.layerOrder[self.start][0])
-
-        shine()

@@ -6,16 +6,20 @@ from time import sleep
 
 
 class OLED:
+    installed = False
     w = 128
-
     h = 64
 
     def __init__(self, led):
-        release_displays()
-
-        i2c = I2C(scl=GP21, sda=GP20)
-        dbus = I2CDisplay(i2c, device_address=0x3C)
-        self.d = SSD1306(dbus, width=self.w, height=self.h)
+        try:
+            release_displays()
+            i2c = I2C(scl=GP21, sda=GP20)
+            dbus = I2CDisplay(i2c, device_address=0x3C)
+            self.d = SSD1306(dbus, width=self.w, height=self.h)
+            self.installed = True
+        except:
+            print('no display')
+            return
 
         self.g = Group()
         self.b = Bitmap(self.w, self.h, 2)
@@ -35,6 +39,9 @@ class OLED:
         self.row(0, self.h, 0)
 
     def row(self, start=0, end=h, v=1):
+        if not self.installed:
+            return
+
         for y in range(min(self.h, self.h - start - 1), max(0, self.h - end - 1), -1):
             for x in range(self.w):
                 self.b[x, y] = v
@@ -42,6 +49,9 @@ class OLED:
         self.d.show(self.g)
 
     def showLayer(self, order, l):
+        if not self.installed:
+            return
+
         for i, o in enumerate(sorted(order)):
             if order[o][0] == l:
                 for y in range(1 + i):
