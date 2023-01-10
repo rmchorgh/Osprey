@@ -22,7 +22,7 @@ class Layers(L):
             self.km.oled.showLayer(self.km.layerOrder, key.meta.layer)
         shine(1, 1, 0)
         sleep(0.5)
-        shine(1,1,1)
+        shine(1, 1, 1)
         super()._to_pressed(key, kbd, *args, **kwargs)
 
 
@@ -117,6 +117,7 @@ class Keymap:
             data_pin=GP1,
             data_pin2=GP0,
             use_pio=True,
+            uart_flip=side == 'right'
         )
         self.kbd.modules.append(self.split)
 
