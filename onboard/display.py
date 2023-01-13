@@ -58,6 +58,6 @@ class OLED:
                     offset = y * 10
                     self.row(offset, offset + 5)
 
-                sleep(1)
+                sleep(0.5)
                 self.clear()
                 break

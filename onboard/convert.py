@@ -8,7 +8,7 @@ from kmk.modules.modtap import ModTap
 from kmk.modules.split import Split, SplitType, SplitSide
 
 from display import OLED
-from led_pwm import shine
+from led_pwm import layerShine
 
 
 class Layers(L):
@@ -20,9 +20,11 @@ class Layers(L):
         if self.km.side == "left":
             self.km.oled.clear()
             self.km.oled.showLayer(self.km.layerOrder, key.meta.layer)
-        shine(1, 1, 0)
-        sleep(0.5)
-        shine(1, 1, 1)
+        
+        layerShine(self.km.layers, self.km.layerOrder, key.meta.layer)
+        #sleep(0.5)
+        #shine(0, 0, 0)
+
         super()._to_pressed(key, kbd, *args, **kwargs)
 
 
