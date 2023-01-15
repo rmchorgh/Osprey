@@ -6,7 +6,7 @@
 	"layers": {
 		"0c;leMac": {
             "color": [54, 159, 201],
-			"sublayers": ["Shf", "Fun", "Sul"],
+			"sublayers": ["Shf", "Fun"],
 			"0": [
 				["Esc", "`", "F1"],
 				["1", "?", "F2"],
@@ -41,7 +41,7 @@
             ],
 			"4": [
 				"Fun",
-				"a",
+                ["a", 0, "Sul+m"],
 				["s", 0, "Dle"],
 				["r", 0, "Ddo"],
 				["t", 0, "Dri"],
@@ -149,7 +149,7 @@
 			"sublayers": ["Shf"],
 			"0": [null, null, null, "Rsh+Sul+3", "Rsh+Sul+4", null],
 			"2": [null, null, "Dho", "Dup", "Den", null],
-			"4": [null, null, "Dle", "Ddo", "Dri", null],
+			"4": ["Etg", null, "Dle", "Ddo", "Dri", null],
 			"6": [null, null, "Dpu", "Ins", "Dpd", null],
 			"8": [null, "Bsp", "Lnu", "All", "Sul", "Ctl"],
 			"1": ["/", "7", "8", "9", ["(", ")"], ["Bsp", "Del"]],

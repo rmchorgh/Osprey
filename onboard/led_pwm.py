@@ -1,5 +1,6 @@
 from board import GP15, GP22, GP26_A0
 from pwmio import PWMOut as pwm
+from time import sleep
 
 class LED:
     shouldToggle = False
@@ -25,9 +26,11 @@ class LED:
                 print('found layer')
                 r, g, b = self.km.layers[o]['color']
                 self.shine(r, g, b)
+                
+                print('should shine' if not self.shouldToggle else "shouldn't shine")
 
                 if self.shouldToggle:
-                    sleep(0.25)
+                    sleep(0.5)
                     self.shine(0, 0, 0)
 
                 break

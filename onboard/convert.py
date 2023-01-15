@@ -1,7 +1,5 @@
 from json import loads
 from board import GP0, GP1
-from time import sleep
-import storage
 
 from kmk.keys import KC as kc, Key
 from kmk.modules.layers import Layers as L
@@ -38,15 +36,13 @@ class Layers(L):
         super()._to_pressed(key, kbd, *args, **kwargs)
 
     # toggle led shine
-    def _tt_pressed(self, key, kbd, *args, **kwargs):
+    def _tg_pressed(self, key, kbd, *args, **kwargs):
         if LED_INSTALLED:
-            self.led.toggleShine = not self.led.toggleShine
-            print(self.led.toggleShine)
+            self.led.shouldToggle = not self.led.shouldToggle
+            print('should shine' if self.led.shouldToggle else "shouldn't shine")
 
-        self._to_pressed(key, kbd, *args, **kwargs)
-
-    def _tt_released(self, key, kbd, *args, **kwargs):
-        super()._to_released(key, kbd, *args, **kwargs)
+    def _tg_released(self, key, kbd, *args, **kwargs):
+        print('idk if i need this')
 
 class Keymap:
     def asKC(self, char, layer):
@@ -77,6 +73,8 @@ class Keymap:
                 else:
                     pl = keys[pl]
                 return kc.TT(self.layerOrder[pl][0])
+            elif key == "Etg":
+                return kc.TG(0)
             elif len(key) == 1:
                 cn = ord(key)
 
