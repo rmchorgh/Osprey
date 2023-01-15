@@ -1,8 +1,9 @@
 from json import loads
 from board import GP0, GP1
 
-from kmk.keys import KC as kc, Key
-from kmk.modules.layers import Layers as L
+from kmk.keys import KC as kc, make_argumented_key as makeKey
+
+from kmk.modules.layers import Layers as L, layer_key_validator
 from kmk.modules.modtap import ModTap
 from kmk.modules.split import Split, SplitType, SplitSide
 
@@ -24,6 +25,13 @@ class Layers(L):
         
         super().__init__()
 
+        makeKey(
+            validator=layer_key_validator, 
+            names=('LED_TG',),
+            on_press=self._ledTogglePressed,
+            on_release=self._ledToggleReleased,
+        )
+
     # swap layers
     def _to_pressed(self, key, kbd, *args, **kwargs):
         if LED_INSTALLED: 
@@ -36,12 +44,12 @@ class Layers(L):
         super()._to_pressed(key, kbd, *args, **kwargs)
 
     # toggle led shine
-    def _tg_pressed(self, key, kbd, *args, **kwargs):
+    def _ledTogglePressed(self, key, kbd, *args, **kwargs):
         if LED_INSTALLED:
             self.led.shouldToggle = not self.led.shouldToggle
             print('should shine' if self.led.shouldToggle else "shouldn't shine")
 
-    def _tg_released(self, key, kbd, *args, **kwargs):
+    def _ledToggleReleased(self, key, kbd, *args, **kwargs):
         print('idk if i need this')
 
 class Keymap:
@@ -72,9 +80,9 @@ class Keymap:
                     pl = keys[0]
                 else:
                     pl = keys[pl]
-                return kc.TT(self.layerOrder[pl][0])
+                return kc.TO(self.layerOrder[pl][0])
             elif key == "Etg":
-                return kc.TG(0)
+                return kc.LED_TG(0)
             elif len(key) == 1:
                 cn = ord(key)
 
@@ -129,8 +137,8 @@ class Keymap:
         self.kbd.modules.append(ModTap())
 
         self.split = Split(
-            data_pin=GP1 if side == 'left' else GP0,
-            data_pin2=GP0 if side == 'left' else GP1,
+            data_pin=GP1,
+            data_pin2=GP0,
             use_pio=True
         )
         self.kbd.modules.append(self.split)
