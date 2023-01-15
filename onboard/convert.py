@@ -1,6 +1,7 @@
 from json import loads
 from board import GP0, GP1
 from time import sleep
+import storage
 
 from kmk.keys import KC as kc, Key
 from kmk.modules.layers import Layers as L
@@ -8,25 +9,44 @@ from kmk.modules.modtap import ModTap
 from kmk.modules.split import Split, SplitType, SplitSide
 
 from display import OLED
-from led_pwm import layerShine
+from led_pwm import LED
 
+LED_INSTALLED = True
+OLED_INSTALLED = False
 
 class Layers(L):
     def __init__(self, km):
         self.km = km
+
+        if LED_INSTALLED:
+            self.led = LED(self.km)
+
+        if OLED_INSTALLED:
+            self.oled = OLED(self.km)
+        
         super().__init__()
 
+    # swap layers
     def _to_pressed(self, key, kbd, *args, **kwargs):
-        if self.km.side == "left":
-            self.km.oled.clear()
-            self.km.oled.showLayer(self.km.layerOrder, key.meta.layer)
-        
-        layerShine(self.km.layers, self.km.layerOrder, key.meta.layer)
-        #sleep(0.5)
-        #shine(0, 0, 0)
+        if LED_INSTALLED: 
+            self.led.layerShine(key.meta.layer)
+
+        if OLED_INSTALLED:
+            self.oled.clear()
+            self.oled.showLayer(self.km.layerOrder, key.meta.layer)
 
         super()._to_pressed(key, kbd, *args, **kwargs)
 
+    # toggle led shine
+    def _tt_pressed(self, key, kbd, *args, **kwargs):
+        if LED_INSTALLED:
+            self.led.toggleShine = not self.led.toggleShine
+            print(self.led.toggleShine)
+
+        self._to_pressed(key, kbd, *args, **kwargs)
+
+    def _tt_released(self, key, kbd, *args, **kwargs):
+        super()._to_released(key, kbd, *args, **kwargs)
 
 class Keymap:
     def asKC(self, char, layer):
@@ -56,7 +76,7 @@ class Keymap:
                     pl = keys[0]
                 else:
                     pl = keys[pl]
-                return kc.TO(self.layerOrder[pl][0])
+                return kc.TT(self.layerOrder[pl][0])
             elif len(key) == 1:
                 cn = ord(key)
 
@@ -106,24 +126,16 @@ class Keymap:
         self.layout = []
         self.side = side
 
-        if side == "left":
-            self.oled = OLED(led)
-
         self.kbd = kbd
         self.kbd.modules.append(Layers(self))
         self.kbd.modules.append(ModTap())
 
-        print(side, "side")
-
         self.split = Split(
-            data_pin=GP1,
-            data_pin2=GP0,
-            use_pio=True,
-            uart_flip=side == 'right'
+            data_pin=GP1 if side == 'left' else GP0,
+            data_pin2=GP0 if side == 'left' else GP1,
+            use_pio=True
         )
         self.kbd.modules.append(self.split)
-
-        print("added modules")
 
         with open("layout.json", "r") as f:
             j = loads(f.read())
@@ -181,8 +193,6 @@ class Keymap:
         self.layout = lm
         self.kbd.keymap = self.layout
 
-        print("added keymap")
-
-        if side == "left":
+        if OLED_INSTALLED:
             self.oled.clear()
             self.oled.showLayer(self.layerOrder, self.layerOrder[self.start][0])

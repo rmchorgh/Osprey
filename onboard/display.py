@@ -29,9 +29,9 @@ class OLED:
         self.p[1] = 0xFFFFFF
 
         led.value = True
-        sleep(0.5)
+        sleep(0.1)
         self.tg = TileGrid(self.b, pixel_shader=self.p)
-        sleep(0.5)
+        sleep(0.1)
         led.value = False
         self.g.append(self.tg)
 
@@ -58,6 +58,6 @@ class OLED:
                     offset = y * 10
                     self.row(offset, offset + 5)
 
-                sleep(0.5)
+                sleep(0.1)
                 self.clear()
                 break
