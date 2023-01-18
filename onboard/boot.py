@@ -8,14 +8,14 @@ from digitalio import DigitalInOut, Direction, Pull
 
 supervisor.set_next_stack_limit(4096 + 4096)
 
-# if GP19 x GP3 is high, dont disable cdc
+# if B1 is pressed, don't disable cdc
 c = DigitalInOut(GP3)
 r = DigitalInOut(GP19)
 
-c.direction = Direction.OUTPUT
+c.switch_to_output(value=True)
 r.switch_to_input(pull=Pull.DOWN)
 
-if not row.value:
+if not r.value:
     storage.disable_usb_drive()
     usb_cdc.disable()
     usb_hid.enable(boot_device=1)
