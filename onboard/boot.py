@@ -18,7 +18,8 @@ r.switch_to_input(pull=Pull.DOWN)
 if not r.value:
     storage.disable_usb_drive()
     usb_cdc.disable()
-    usb_hid.enable(boot_device=1)
+
+usb_hid.enable(boot_device=1)
 
 r.deinit()
 c.deinit()
